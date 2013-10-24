@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<title>Welcome to url-shorten page!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Welcome to url-shorten page!</h1>
+<p>&nbsp;</p>
+
+<div>长地址:</div>
+<textarea id="source" rows="3" cols="60"></textarea>
+<br></br>
+<button id="create-button" onclick="javascript:create();">生成短地址</button>
+<br></br>
+<div id="result"></div>
+
+<script>
+    var xmlHttp;
+
+    function create() {
+    	var source = document.getElementById("source").value;
+    	if (source == null || source == "") 
+    		return;
+    	
+    	createXmlHttpRequest();
+    	var queryString = "/shorten?";
+        queryString += "date=" + new Date() + "&url=" + encodeURIComponent(source);
+    	xmlHttp.open("GET", queryString, false);
+        xmlHttp.onreadystatechange = handleStateChange;
+        xmlHttp.send(null);
+    }
+
+    function createXmlHttpRequest() {
+		if (window.XMLHttpRequest)
+		    // code for IE7+, Firefox, Chrome, Opera, Safari
+		    xmlHttp = new XMLHttpRequest();
+		else
+		    // code for IE6, IE5
+		    xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+	}
+
+    function handleStateChange() {
+        if(xmlHttp.readyState==4 && xmlHttp.status == 200)
+        	document.getElementById("result").innerHTML = xmlHttp.responseText;
+    }
+
+</script>
+</body>
+</html>
