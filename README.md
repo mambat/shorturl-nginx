@@ -1,4 +1,3 @@
-
 ShortURL-Nginx
 ----------
 
@@ -13,6 +12,7 @@ Setup
  - Copy the html/**shorten-ui.html** to your own nginx **html** directory
  - Download lua-resty-redis(https://github.com/agentzh/lua-resty-redis) and copy the lib/resty/**redis.lua** to your own nginx **conf/lua/resty/** directory
  - Add the follow configurations to your nginx.conf, then start your nginx
+
 > **http block:** lua_package_path
 >
 > **server block:** location a)shorten-ui.html b)shorten c)^/[0-9a-zA-Z]{1,5}$
