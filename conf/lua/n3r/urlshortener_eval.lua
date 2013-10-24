@@ -68,7 +68,7 @@ local pack_script =  "local short_pre = ARGV[1] "
 function _M.pack(urlPrefix, checkAlready)
     local short_pre = urlPrefix or ("http://" .. ngx.var.host ..
                          ":" .. ngx.var.server_port .. "/")
-    local url = ngx.var.arg_url
+    local url = ngx.var.url_param
     local hash = ngx.md5(url)
 
     local red = connect()
