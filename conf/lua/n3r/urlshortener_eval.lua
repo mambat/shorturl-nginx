@@ -65,15 +65,23 @@ local pack_script =  "local short_pre = ARGV[1] "
                   .. "\n "
                   .. "return short_pre .. id "
  
-function _M.pack(urlPrefix, checkAlready)
-    local short_pre = urlPrefix or ("http://" .. ngx.var.host ..
-                         ":" .. ngx.var.server_port .. "/")
-    local url = ngx.var.url_param
+function _M.pack(url, shortPrefix, checkAlready)
+    if shortPrefix == nil then
+        local port = ""
+        if ngx.var.server_port ~= "80" then
+            port = ":" .. ngx.var.server_port
+        end
+
+        shortPrefix = "http://" .. ngx.var.server_name .. port .. "/"
+    else
+        shortPrefix = "http://" .. shortPrefix .. "/"
+    end
+
     local hash = ngx.md5(url)
 
     local red = connect()
     local res, err = red:eval(pack_script, 4, "short_pre", "arg_url", "md5_url", "checkAlready", 
-        short_pre, url, hash, checkAlready);
+        shortPrefix, url, hash, checkAlready);
     
     if not res then
         ngx.say(err)

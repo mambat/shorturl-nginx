@@ -6,7 +6,7 @@
 <title>Welcome to url-shorten page!</title>
 <style>
     body {
-        width: 35em;
+        width: 60em;
         margin: 0 auto;
         font-family: Tahoma, Verdana, Arial, sans-serif;
     }
@@ -18,6 +18,11 @@
 
 <div>长地址:</div>
 <textarea id="source" rows="3" cols="60"></textarea>
+<span style="display:inline">http://mall.10010.com/goodsdetail/981309188419.html</span>
+<br></br>
+<div>短地址域名:</div>
+<textarea id="prefix" rows="3" cols="60"></textarea>
+<span style="display:inline">m.10010.com:8081</span>
 <br></br>
 <button id="create-button" onclick="javascript:create();">生成短地址</button>
 <br></br>
@@ -28,12 +33,15 @@
 
     function create() {
     	var source = document.getElementById("source").value;
-    	if (source == null || source == "") 
-    		return;
+    	if (!source) return;
     	
     	createXmlHttpRequest();
     	var queryString = "/shorten?";
         queryString += "date=" + new Date() + "&url=" + encodeURIComponent(source);
+
+        var prefix = document.getElementById("prefix").value;
+        if (prefix) queryString += "&prefix=" + prefix;
+
     	xmlHttp.open("GET", queryString, false);
         xmlHttp.onreadystatechange = handleStateChange;
         xmlHttp.send(null);
