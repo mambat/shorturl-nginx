@@ -66,17 +66,6 @@ local pack_script =  "local short_pre = ARGV[1] "
                   .. "return short_pre .. id "
  
 function _M.pack(url, shortPrefix, checkAlready)
-    if shortPrefix == nil then
-        local port = ""
-        if ngx.var.server_port ~= "80" then
-            port = ":" .. ngx.var.server_port
-        end
-
-        shortPrefix = "http://" .. ngx.var.server_name .. port .. "/"
-    else
-        shortPrefix = "http://" .. shortPrefix .. "/"
-    end
-
     local hash = ngx.md5(url)
 
     local red = connect()

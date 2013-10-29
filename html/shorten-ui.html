@@ -31,13 +31,25 @@
 <script>
     var xmlHttp;
 
+    String.prototype.trim= function(){  
+        // 用正则表达式将前后空格用空字符串替代。  
+        return this.replace(/(^\s*)|(\s*$)/g, "");  
+    }
+
     function create() {
     	var source = document.getElementById("source").value;
-    	if (!source) return;
+    	if (!source) {
+            alert("请输入长地址！");
+            return;
+        };
+        if (source.trim() == "") {
+            alert("长地址全为空格！");
+            return;
+        };
     	
     	createXmlHttpRequest();
     	var queryString = "/shorten?";
-        queryString += "date=" + new Date() + "&url=" + encodeURIComponent(source);
+        queryString += "date=" + new Date().getTime() + "&url=" + encodeURIComponent(source);
 
         var prefix = document.getElementById("prefix").value;
         if (prefix) queryString += "&prefix=" + prefix;
