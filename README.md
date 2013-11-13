@@ -10,7 +10,7 @@ Setup
  - Build your nginx with **lua-nginx-module** and **set-misc-nginx-module**
  - Copy the lua script conf/lua/n3r/**urlshortener_eval.lua** to your own nginx **conf/lua/n3r/** directory, and update the redis configurations in the **connect** function
  - Copy the html/**shorten-ui.html** to your own nginx **html** directory
- - Download lua-resty-redis(https://github.com/agentzh/lua-resty-redis) and copy the lib/resty/**redis.lua** to your own nginx **conf/lua/resty/** directory
+ - Download [lua-resty-redis](https://github.com/agentzh/lua-resty-redis) and copy the lib/resty/**redis.lua** to your own nginx **conf/lua/resty/** directory
  - Add the follow configurations to your nginx.conf, then start your nginx
 
 > **http block:** lua_package_path
