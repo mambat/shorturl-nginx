@@ -77,12 +77,23 @@ function exec_pack_script(red, shortPrefix, url, hash, random_alphanum, checkAlr
         shortPrefix, url, hash, random_alphanum, checkAlready)
 end 
 
-function _M.pack(url, shortPrefix, random_alphanum, checkAlready)
+function _M.pack(arg_url, shortPrefix, random, checkAlready)
+  
+    local unescape_url = ndk.set_var.set_unescape_uri(arg_url)
+
+    local url = unescape_url:gsub("^%s*(.-)%s*$", "%1")
+
+    if url == "" then
+      return ngx.exit(400)
+    end
+
     local hash = ngx.md5(url)
 
     local red = connect()
 
-    if random_alphanum then
+    if random then
+
+        local random_alphanum = ndk.set_var.set_secure_random_alphanum(12) 
 
         local res, err = exec_pack_script(red, shortPrefix, url, hash, random_alphanum, checkAlready)
         
