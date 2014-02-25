@@ -15,62 +15,117 @@
 <body>
 <h1>Welcome to url-shorten page!</h1>
 <p>&nbsp;</p>
-
 <div>长地址:</div>
-<textarea id="source" rows="3" cols="60"></textarea>
-<span style="display:inline">http://mall.10010.com/goodsdetail/981309188419.html</span>
+<textarea id="source" rows="3" cols="60" onclick="javascript:tishi();"></textarea>
 <br></br>
 <div>短地址域名:</div>
-<textarea id="prefix" rows="3" cols="60"></textarea>
-<span style="display:inline">m.10010.com:8081</span>
+<textarea id="prefix" rows="3" cols="60" ></textarea>
+<br></br>
+<div>是否随机生成短地址:</div>
+<input type="radio" name="random" value="true">是
+<input type="radio" name="random" value="false" checked="checked">否
 <br></br>
 <button id="create-button" onclick="javascript:create();">生成短地址</button>
 <br></br>
+<font color="#3366ff">
+<strong>
 <div id="result"></div>
+</strong>  
+</font>
 
 <script>
     var xmlHttp;
 
-    String.prototype.trim= function(){  
-        // 用正则表达式将前后空格用空字符串替代。  
-        return this.replace(/(^\s*)|(\s*$)/g, "");  
+    var source = document.getElementById("source");
+
+    source.onblur = function() {
+        var text = this.value;
+
+        if (text != "" && text.search("http://") < 0) {
+            this.value = "http://"+text;
+        } 
+        else if (text == "") {
+            this.value = "http://请输入网址";
+        }
+        this.style.color = "#999";
+    }
+
+    source.onfocus = function () {
+        var text = this.value;
+
+        if(text == "http://请输入网址") {
+            this.value = "";
+        }
+
+        this.style.color="#333";
     }
 
     function create() {
-    	var source = document.getElementById("source").value;
-    	if (!source) {
+
+        String.prototype.trim = function() {  
+            // 用正则表达式将前后空格用空字符串替代
+            return this.replace(/(^\s*)|(\s*$)/g, "");
+        }
+
+        String.prototype.ss = function() {  
+            return this.replace("http://", "");
+        }
+
+        String.prototype.ll = function() {  
+            return this.replace("http://请输入网址", "");
+        }
+
+        var source = document.getElementById("source").value;
+
+        if (!source) {
             alert("请输入长地址！");
             return;
+        }
+
+        if (source.ss() == "") {
+           alert("请输入具体URL");
+           return;
         };
-        if (source.trim() == "") {
-            alert("长地址全为空格！");
-            return;
+
+        if (source.ll() == "") {
+           alert("请输入长地址^-^");
+           return;
         };
-    	
-    	createXmlHttpRequest();
-    	var queryString = "/shorten?";
-        queryString += "date=" + new Date().getTime() + "&url=" + encodeURIComponent(source);
+        
+        createXmlHttpRequest();
+
+        var queryString = "/shorten?";
+        queryString += "date=" + new Date() + "&url=" + encodeURIComponent(source);
 
         var prefix = document.getElementById("prefix").value;
         if (prefix) queryString += "&prefix=" + prefix;
+        
+        var random = document.getElementsByName("random");
+        for (var x = 0; x < random.length; x ++) {
+            if (random[x].checked && random[x].value == "true") {
+               queryString += "&random=" + random[x].value;
+            }
+        }
 
-    	xmlHttp.open("GET", queryString, false);
+        alert(queryString);
+
+        xmlHttp.open("GET", queryString, false);
         xmlHttp.onreadystatechange = handleStateChange;
         xmlHttp.send(null);
     }
 
     function createXmlHttpRequest() {
-		if (window.XMLHttpRequest)
-		    // code for IE7+, Firefox, Chrome, Opera, Safari
-		    xmlHttp = new XMLHttpRequest();
-		else
-		    // code for IE6, IE5
-		    xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
-	}
+        if (window.XMLHttpRequest)
+            // code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlHttp = new XMLHttpRequest();
+        else
+            // code for IE6, IE5
+            xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+    }
 
     function handleStateChange() {
         if(xmlHttp.readyState==4 && xmlHttp.status == 200)
-        	document.getElementById("result").innerHTML = xmlHttp.responseText;
+            document.getElementById("result").innerHTML = xmlHttp.responseText;
     }
 
 </script>

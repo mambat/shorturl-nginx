@@ -15,21 +15,23 @@ Setup
 
 > **http block:** lua_package_path
 >
-> **server block:** location a)shorten-ui.html b)shorten c)^/[0-9a-zA-Z]{1,5}$
+> **server block:** location a)shorten-ui.html b)shorten c)^/0[0-9a-zA-Z]{1,12}$
 >
 > You could find these configurations in my **conf/nginx.conf** 
 
 Basic Usage
 ---------
 
-#### <i class="icon-file"></i> Create a Short URL
-
+#### <i class="icon-file"></i> Create a short url
     http://localhost:8088/shorten?url=http://www.google.com
 > **NOTE:** Do not forget the **http://** prefix within the **url** parameter
 
-#### <i class="icon-folder-open"></i> Visit the Short URL
+#### <i class="icon-folder-open"></i> Visit the short url
     Just visit the url that the previous step returned
 
-#### <i class="icon-pencil"></i> URL Shorten Web Page
+#### <i class="icon-pencil"></i> Web UI
     http://localhost:8088/shorten-ui.html
 > **NOTE:** In this page, you could input a URL, then get the shorten form
+
+#### <i class="icon-file"></i> Create a random short url
+    http://localhost:8088/shorten?url=http://www.google.com&random=true

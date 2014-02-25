@@ -30,7 +30,8 @@ end
 local pack_script =  "local short_pre = ARGV[1] "
                   .. "local arg_url = ARGV[2] "
                   .. "local md5_url = ARGV[3] "
-                  .. "local checkAlready = ARGV[4]"
+                  .. "local id = ARGV[4] "
+                  .. "local checkAlready = ARGV[5] "
                   .. "\n "
                   .. "local basen = function(n) "
                   .. "    local digits = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' "
@@ -40,20 +41,26 @@ local pack_script =  "local short_pre = ARGV[1] "
                   .. "        n = math.floor(n / 62) "
                   .. "        table.insert(t, 1, digits:sub(d, d)) "
                   .. "    until n == 0 "
-                  .. "    return table.concat(t, ''); "
+                  .. "    return table.concat(t, '') "
                   .. "end "
                   .. "\n "
                   .. "if checkAlready or true then " 
                   .. "    redis.call('select', 1) "
-                  .. "    local id, err = redis.call('get', md5_url) "
-                  .. "    if id then "
-                  .. "        return short_pre .. id "
+                  .. "    local already, err = redis.call('get', md5_url) "
+                  .. "    if already then "
+                  .. "        return short_pre .. 0 .. already "
                   .. "    end "
                   .. "end "
                   .. "\n "
-                  .. "redis.call('select', 2) "
-                  .. "local count, err = redis.call('incr', 'shorten.count') "
-                  .. "local id, err = basen(count) "
+                  .. "if id then "
+                  .. "    redis.call('select', 0) "
+                  .. "    local url = redis.call('get', id) "
+                  .. "    if url then return 'ERR:RAU' end "
+                  .. "else "
+                  .. "    redis.call('select', 2) "
+                  .. "    local count, err = redis.call('incr', 'shorten.count') "
+                  .. "    id = basen(count) "
+                  .. "end "
                   .. "\n "
                   .. "if checkAlready or true then "
                   .. "    redis.call('select', 1) "
@@ -63,14 +70,31 @@ local pack_script =  "local short_pre = ARGV[1] "
                   .. "redis.call('select', 0) "
                   .. "redis.call('set', id, arg_url) "
                   .. "\n "
-                  .. "return short_pre .. id "
+                  .. "return short_pre .. 0 .. id "
  
-function _M.pack(url, shortPrefix, checkAlready)
+function exec_pack_script(red, shortPrefix, url, hash, random_alphanum, checkAlready)
+    return red:eval(pack_script, 5, "short_pre", "arg_url", "md5_url", "random_alphanum", "checkAlready",
+        shortPrefix, url, hash, random_alphanum, checkAlready)
+end 
+
+function _M.pack(url, shortPrefix, random_alphanum, checkAlready)
     local hash = ngx.md5(url)
 
     local red = connect()
-    local res, err = red:eval(pack_script, 4, "short_pre", "arg_url", "md5_url", "checkAlready", 
-        shortPrefix, url, hash, checkAlready);
+
+    if random_alphanum then
+
+        local res, err = exec_pack_script(red, shortPrefix, url, hash, random_alphanum, checkAlready)
+        
+        -- comment "--" was illegal in redis lua script, WTF!!
+        -- ERR: RANDOM ALREADY USED
+        if res and res ~= 'ERR:RAU' then
+            ngx.say(res)
+            return ngx.exit(ngx.OK)
+        end
+    end
+
+    local res, err = exec_pack_script(red, shortPrefix, url, hash, nil, checkAlready);
     
     if not res then
         ngx.say(err)
@@ -112,11 +136,10 @@ local unpack_script = "local id = ARGV[1] "
                    .. "return url "
  
 function _M.unpack(notFoundRedirect, recordHits, recordReferAndUserAgent)
-    local id = string.sub(ngx.var.request_uri, 2) -- remove prefix /
+    -- remove the prefix "/" and "0"
+    local id = string.sub(ngx.var.request_uri, 3)
     
-    -- what's the fuck!
-    -- if puts the operation (referer .. '|' .. user_agent) in the unpack script,
-    -- then occur various errors
+    -- (referer .. "|" .. user_agent) in the unpack script may result in inexplicable errors, WTF!
     local referer = ngx.var.http_referer or ""
     local user_agent = ngx.var.http_user_agent or ""
 
