@@ -72,19 +72,31 @@ local pack_script =  "local short_pre = ARGV[1] "
                   .. "\n "
                   .. "return short_pre .. 0 .. id "
  
-function exec_pack_script(red, shortPrefix, url, hash, random_alphanum, checkAlready)
+function exec_pack_script(red, prefix, url, hash, random_alphanum, checkAlready)
     return red:eval(pack_script, 5, "short_pre", "arg_url", "md5_url", "random_alphanum", "checkAlready",
-        shortPrefix, url, hash, random_alphanum, checkAlready)
+        prefix, url, hash, random_alphanum, checkAlready)
 end 
 
-function _M.pack(arg_url, shortPrefix, random, checkAlready)
+function _M.pack(arg_url, prefix, random, checkAlready)
   
+    -- url
     local unescape_url = ndk.set_var.set_unescape_uri(arg_url)
 
     local url = unescape_url:gsub("^%s*(.-)%s*$", "%1")
 
     if url == "" then
       return ngx.exit(400)
+    end
+
+    -- prefix
+    if prefix == nil then
+        if ngx.var.server_port == "80" then
+            prefix = "http://" .. ngx.var.server_name .. "/"
+        else 
+            prefix = "http://" .. ngx.var.server_name .. ":" .. ngx.var.server_port .. "/"
+        end
+    else 
+        prefix = "http://" .. prefix .. "/"
     end
 
     local hash = ngx.md5(url)
@@ -95,7 +107,7 @@ function _M.pack(arg_url, shortPrefix, random, checkAlready)
 
         local random_alphanum = ndk.set_var.set_secure_random_alphanum(12) 
 
-        local res, err = exec_pack_script(red, shortPrefix, url, hash, random_alphanum, checkAlready)
+        local res, err = exec_pack_script(red, prefix, url, hash, random_alphanum, checkAlready)
         
         -- comment "--" was illegal in redis lua script, WTF!!
         -- ERR: RANDOM ALREADY USED
@@ -105,7 +117,7 @@ function _M.pack(arg_url, shortPrefix, random, checkAlready)
         end
     end
 
-    local res, err = exec_pack_script(red, shortPrefix, url, hash, nil, checkAlready);
+    local res, err = exec_pack_script(red, prefix, url, hash, nil, checkAlready);
     
     if not res then
         ngx.say(err)
