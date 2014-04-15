@@ -1,4 +1,4 @@
-ShortURL-Nginx
+shorturl-nginx
 ----------
 
 A URL Shortener with analytics based on Nginx and Redis
