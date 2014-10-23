@@ -179,5 +179,30 @@ function _M.unpack(notFoundRedirect, recordHits, recordReferAndUserAgent)
 
     return ngx.redirect(res)
 end
+
+function _M.qry_by_short(url)
+  if url == nil then
+    ngx.say(nil)
+    return ngx.exit(ngx.OK)
+  end
+
+  local id_index = string.find(url, "/0[0-9a-zA-Z]+$")
+  if id_index == nil then
+    ngx.say(nil)
+    return ngx.exit(ngx.OK)
+  end
+
+  local red = connect()
+  local res, err = red:eval(unpack_script, 4, "id", "referer_agent", "recordHits", "recordReferAndUserAgent", 
+      string.sub(url, id_index + 2), nil, nil, nil);
+
+  if res == ngx.null then
+    ngx.say(nil)
+    return ngx.exit(ngx.OK)
+  end
+
+  ngx.say(res)
+  return ngx.exit(ngx.OK)
+end
  
 return _M
