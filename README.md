@@ -35,3 +35,6 @@ Basic Usage
 
 #### <i class="icon-file"></i> Create a random short url
     http://localhost:8088/shorten?url=http://www.google.com&random=true
+    
+#### <i class="icon-file"></i> Query source url by the short 
+    http://localhost:8088/shorten-qrybyshort?url=http://t.cn/0asd
